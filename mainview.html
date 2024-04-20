@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cars</title>
+    <link rel="stylesheet" href="./styles/global.css" />
+    <link rel="stylesheet" href="./styles/mainview.css" />
+</head>
+
+<body>
+    <header class="cars-header">
+        <div class="cars-header__nav-row"></div>
+        <figure class="cars-header__logo">
+            <img src="./assets/cars-logo.svg" alt="Logo Cars"></img>
+        </figure>
+        <div class="cars-header__line"></div>
+    </header>
+
+    <main>
+        <section id="available-cars" class="cars-sc">
+            <div class="cars-container--grid">
+                <!-- all cars rendered by js; --car-bg depends on the brand of the car -->
+            </div>
+        </section>
+
+        <section id="car-order-1" class="display-none">
+            <div class="car-container--chosen">
+                <!-- chosen car hero rendered by js; --car-bg depends on the brand of the car -->
+            </div>
+
+            <div class="text-content-container">
+                <h1>Order <!-- model name --></h1>
+                <p class="font2 larger">and go on holiday in your new <!-- brand name -->!</p>
+                <button id="back-btn-1" class="btn--white" aria-label="go back to all available cars">
+                    <span class="ti ti-arrow-left"></span> or go back to find another model
+                </button>
+            </div>
+
+            <form id="order-form-1" class="form-container text-content-container">
+
+                <hr class="c-hr">
+
+                <fieldset>
+                    <legend class="medium">Personal data:</legend>
+                    <div class="form-row">
+                        <label for="fullname">Your name:</label>
+                        <input type="text" id="fullname" placeholder="e.g. Hatty Ford-Lego" required>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend class="medium">Order details:</legend>
+                    <div class="form-row">
+                        <label for="pickupplace">Car pickup location:</label>
+                        <input type="text" id="pickupplace" placeholder="e.g. CarLand" required>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="pickupdate">Car pickup date:</label>
+                        <input type="date" id="pickupdate" required min=""
+                            aria-label="Select a date (minimum 14 days from today)">
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend class="medium">Additional accessories:</legend>
+                    <div class="form-row">
+                        <ul id="accessories-list">
+                            <!-- list rendered by js -->
+                        </ul>
+                    </div>
+                </fieldset>
+                <hr class="c-hr">
+                <fieldset id="payment-method-fieldset">
+                    <legend class="medium">Payment method:</legend>
+                    <div class="form-row">
+                        <ul>
+                            <li>
+                                <label for="cash-payment">
+                                    <input type="radio" id="cash-payment" name="paymentMethod" value="cash">
+                                    Cash
+                                </label>
+                            </li>
+                            <li>
+                                <label for="leasing-payment">
+                                    <input type="radio" id="leasing-payment" name="paymentMethod" value="leasing">
+                                    Leasing
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                </fieldset>
+
+                <hr class="c-hr">
+
+                <fieldset id="order-summary-fieldset">
+                    <legend class="medium">Order summary:</legend>
+                    <div class="form-row">
+                        <ul id="summary-list">
+                            <!-- list rendered by js -->
+                        </ul>
+                    </div>
+                </fieldset>
+                <button id="form-confirm-btn" type="submit" aria-label="Confirm order">confirm order</button>
+            </form>
+
+        </section>
+
+    </main>
+    <footer>
+        <div class="footer-row">
+            <ul class="social-media-list">
+                <li class="social-media-item">
+                    <a href="#" aria-label="Facebook" target="_blank">
+                        <img class="social-media-icon" src="./assets/icon-facebook.svg">
+                        </img>
+                    </a>
+                </li>
+                <li class="social-media-item">
+                    <a href="#" aria-label="Instagram" target="_blank">
+                        <img class="social-media-icon" src="./assets/icon-instagram.svg">
+                        </img>
+                    </a>
+                </li>
+            </ul>
+            <div class="cars-footer__line"></div>
+            <p>
+            <p class="copy-text">Copyright © 2024 Cars</p>
+            </p>
+        </div>
+        <div class="footer-row-bottom">
+            <figure class="cars-footer__logo">
+                <img src="./assets/cars-logo.svg"></img>
+            </figure>
+        </div>
+    </footer>
+    <script defer src="./scripts/carsData.js" type="module"></script>
+    <script defer src="./scripts/main.js" type="module"></script>
+</body>
+
+</html>
