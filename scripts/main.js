@@ -123,16 +123,27 @@ function purchaseButtonClick(buttonId) {
 	const carDetails = cars.find(car => car.id === parseInt(selectedCarId))
 	console.log("Selected car details:", carDetails)
 
-	localStorage.setItem("selectedCarId", selectedCarId)
-	localStorage.setItem("selectedCar", JSON.stringify(carDetails))
+	// Zaktualizuj selectedCarData na podstawie danych wybranego samochodu
+	selectedCarData = {
+		brand: carDetails.brand,
+		model: carDetails.model,
+		year: carDetails.year,
+		enginePower: carDetails.enginePower,
+		mileage: carDetails.mileage,
+		price: carDetails.price,
+		image: carDetails.image,
+		accessories: [...sharedAccesories, ...carDetails.accessoriesByModel],
+	}
 
 	// Debugging - wyświetlenie ID wybranego samochodu w konsoli
-	console.log(localStorage.getItem("selectedCarId"))
+	console.log(selectedCarId)
 
 	allCarsSection.classList.replace("cars-sc", "display-none")
 	orderSection.classList.replace("display-none", "cars-sc")
 
 	renderChosenCar()
+	renderAccessoriesList()
+	renderOrderSummary()
 }
 
 ///////////////////////////////////
@@ -142,15 +153,9 @@ function renderChosenCar() {
 	const chosenCarCard = document.querySelector(".car-container--chosen")
 	chosenCarCard.innerHTML = ""
 
-	selectedCarId = localStorage.getItem("selectedCarId")
-
 	if (selectedCarId !== null) {
-		// renderowanie wybranego samochodu
-
-		const selectedCarDetails = JSON.parse(localStorage.getItem("selectedCar"))
-
-		const cleanModel = selectedCarDetails.model.replace(/[^a-zA-Z0-9-_]/g, "")
-		const cleanId = selectedCarDetails.id
+		const cleanModel = selectedCarData.model.replace(/[^a-zA-Z0-9-_]/g, "")
+		const cleanId = selectedCarId
 
 		const carCard = document.createElement("div")
 		carCard.classList.add("car-card--chosen")
@@ -159,16 +164,16 @@ function renderChosenCar() {
 		const brand = document.createElement("p")
 		brand.classList.add("brand")
 		brand.id = `chosen-${cleanModel}-brand-${cleanId}`
-		brand.textContent = selectedCarDetails.brand
+		brand.textContent = selectedCarData.brand
 
 		const model = document.createElement("h2")
 		model.classList.add("model")
 		model.id = `chosen-model-${cleanId}`
-		model.textContent = selectedCarDetails.model
+		model.textContent = selectedCarData.model
 
 		const image = document.createElement("img")
-		image.src = selectedCarDetails.image
-		image.alt = `${selectedCarDetails.brand} ${selectedCarDetails.model} car`
+		image.src = selectedCarData.image
+		image.alt = `${selectedCarData.brand} ${selectedCarData.model} car`
 
 		const carDetailsContainer = document.createElement("div")
 		carDetailsContainer.classList.add("car-details-container--chosen")
@@ -176,22 +181,22 @@ function renderChosenCar() {
 		const year = document.createElement("p")
 		year.classList.add("year")
 		year.id = `chosen-${cleanModel}-year-${cleanId}`
-		year.textContent = selectedCarDetails.year
+		year.textContent = selectedCarData.year
 
 		const enginePower = document.createElement("p")
 		enginePower.classList.add("engine-power")
 		enginePower.id = `chosen-${cleanModel}-engine-power-${cleanId}`
-		enginePower.textContent = selectedCarDetails.enginePower
+		enginePower.textContent = selectedCarData.enginePower
 
 		const mileage = document.createElement("p")
 		mileage.classList.add("mileage")
 		mileage.id = `chosen-${cleanModel}-mileage-${cleanId}`
-		mileage.textContent = selectedCarDetails.mileage
+		mileage.textContent = selectedCarData.mileage
 
 		const price = document.createElement("p")
 		price.classList.add("price")
 		price.id = `chosen-${cleanModel}-price-${cleanId}`
-		price.textContent = selectedCarDetails.price
+		price.textContent = selectedCarData.price
 
 		const phoneButton = document.createElement("button")
 		phoneButton.classList.add("phone-button", "btn--white")
@@ -206,7 +211,7 @@ function renderChosenCar() {
 		link.textContent = "Call us for more info"
 		phoneButton.appendChild(link)
 
-		const brandColor = brandColors[selectedCarDetails.brand]
+		const brandColor = brandColors[selectedCarData.brand]
 
 		if (brandColor) {
 			chosenCarCard.style.setProperty("--car-bg", brandColor)
@@ -244,3 +249,140 @@ backButton.addEventListener("click", () => {
 	localStorage.removeItem("selectedCar")
 	localStorage.removeItem("selectedAccessories")
 })
+
+/////////////////////////////////////////
+///////  render accesories list   ///////
+/////////////////////////////////////////
+function renderAccessoriesList() {
+	accessoriesList.innerHTML = ""
+
+	selectedCarData.accessories.forEach(accessory => {
+		const listItem = document.createElement("li")
+		listItem.classList.add("accessory")
+		listItem.dataset.id = accessory.id
+
+		const accessoryNameLabel = document.createElement("span")
+		accessoryNameLabel.textContent = `${accessory.name}`
+		listItem.appendChild(accessoryNameLabel)
+
+		if (accessory.id === "addColor") {
+			// Dodanie kolor-pickera
+			const colorLabel = document.createElement("label")
+			colorLabel.htmlFor = "color-picker"
+			colorLabel.textContent = " | pick your choice: "
+			listItem.appendChild(colorLabel)
+
+			const colorInput = document.createElement("input")
+			colorInput.type = "color"
+			colorInput.id = `color-picker-${accessory.id}` // Unikalne id
+			colorInput.dataset.colorVariable = "--individualcar" // kolor domyślny
+			colorInput.value = getComputedStyle(
+				document.documentElement
+			).getPropertyValue("--individualcar") // kolor domyślny
+			listItem.appendChild(colorInput)
+
+			// obsługa wyboru koloru
+			colorInput.addEventListener("input", function () {
+				const color = this.value
+				const colorVariable = this.dataset.colorVariable
+				document.documentElement.style.setProperty(colorVariable, color)
+			})
+
+			// cena dla "Individual Color"
+			const individualColorPrice = selectedCarData.accessories.find(
+				acc => acc.id === "addColor"
+			).price
+			const priceLabel = document.createElement("span")
+			priceLabel.classList.add("medium")
+			priceLabel.textContent = ` | +${individualColorPrice}€ `
+			listItem.appendChild(priceLabel)
+		} else {
+			const priceLabel = document.createElement("span")
+			priceLabel.classList.add("medium")
+			priceLabel.textContent = ` | +${accessory.price}€ `
+			listItem.appendChild(priceLabel)
+		}
+
+		const addButton = document.createElement("button")
+		addButton.id = `acc-btn-${accessory.id}`
+		addButton.classList.add("add-btn")
+		addButton.textContent = "+"
+		listItem.appendChild(addButton)
+
+		accessoriesList.appendChild(listItem)
+	})
+
+	// dodawanie usuwanie akcesoriów z zamówienia
+	accessoriesList.addEventListener("click", function (event) {
+		const clickedButton = event.target.closest("button")
+		if (
+			clickedButton &&
+			(clickedButton.classList.contains("add-btn") ||
+				clickedButton.classList.contains("remove-btn"))
+		) {
+			event.preventDefault()
+		}
+
+		if (event.target.classList.contains("add-btn")) {
+			// pobieramy informacje o wybranym akcesorium
+			const accessoryId = event.target.parentNode.dataset.id
+			const accessoryName =
+				event.target.parentNode.querySelector("span").textContent
+			const accessoryPriceText = event.target.parentNode
+				.querySelector(".medium")
+				?.textContent.replace(/[^\d.]/g, "")
+			const accessoryPrice = parseFloat(accessoryPriceText)
+
+			// dodajemy akcesorium do summary list
+			const selectedAccessoryLi = document.createElement("li")
+			selectedAccessoryLi.textContent = `${accessoryName} | ${accessoryPrice}€`
+			selectedAccessoryLi.id = `selected-acc-${accessoryId}`
+			if (accessoryId === "addColor") {
+				selectedAccessoryLi.classList.add("chosen-color") // Dodanie klasy .chosen-color
+			}
+			orderSummaryList.appendChild(selectedAccessoryLi)
+
+			event.target.textContent = "–"
+			event.target.classList.replace("add-btn", "remove-btn")
+
+			event.target.parentNode.classList.add("selected-acc")
+		} else if (event.target.classList.contains("remove-btn")) {
+			event.preventDefault()
+
+			// pobieramy informacje o usuwanym akcesorium
+			const accessoryId = event.target.parentNode.dataset.id
+
+			const selectedAccessoryLi = document.getElementById(
+				`selected-acc-${accessoryId}`
+			)
+			if (selectedAccessoryLi) {
+				orderSummaryList.removeChild(selectedAccessoryLi)
+			}
+			event.target.textContent = "+"
+			event.target.classList.replace("remove-btn", "add-btn")
+			event.target.parentNode.classList.remove("selected-acc")
+		}
+	})
+}
+
+function renderOrderSummary() {
+	orderSummaryList.innerHTML = ""
+
+	const selectedCarModel = document.createElement("li")
+	selectedCarModel.textContent = `${selectedCarData.brand} ${selectedCarData.model} | ${selectedCarData.price}€`
+	orderSummaryList.appendChild(selectedCarModel)
+
+	// Sprawdzamy, czy pole "fullName" jest uzupełnione
+	const fullName = document.getElementById("fullname").value.trim()
+	if (fullName) {
+		const nameItem = document.createElement("li")
+		nameItem.textContent = `Name: ${fullName}`
+		orderSummaryList.appendChild(nameItem)
+	}
+
+	// Renderujemy wartości z formularza
+	// Kod renderowania danych z formularza został tutaj pominięty
+
+	// Obliczamy i dodajemy sumę Total Price
+	// updateOrderSummary()
+}

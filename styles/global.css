@@ -16,6 +16,7 @@
 	--white: #ffffff;
 	--black: #000000;
 	--pale: #dad5d5;
+	--individualcar: #fec7c7;
 
 	--transparent: #ffffff00;
 	/* background colors */
@@ -295,6 +296,15 @@ fieldset {
 }
 fieldset div {
 	padding-left: var(--space-m);
+}
+
+.chosen-color::before {
+	content: "";
+	display: inline-block;
+	width: var(--space-x);
+	height: var(--space-x);
+	background-color: var(--individualcar);
+	border-radius: 50%;
 }
 
 /*///////////////////////////////*/
