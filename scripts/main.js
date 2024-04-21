@@ -12,6 +12,8 @@ let selectedCarData = {
 	image: null,
 	accessories: [],
 }
+selectedCarData.accessories =
+	selectedCarData.accessories.concat(sharedAccesories)
 
 const allCarsSection = document.getElementById("available-cars")
 const orderSection = document.getElementById("car-order-1")
@@ -85,8 +87,6 @@ function renderCars() {
 			"Click here to open the purchase form"
 		)
 
-		purchaseButton.addEventListener("click", () => purchaseButtonClick(car.id))
-
 		carDetailsContainer.append(
 			brandModel,
 			year,
@@ -97,6 +97,11 @@ function renderCars() {
 		)
 		carCard.append(brand, model, image, carDetailsContainer)
 		carGrid.appendChild(carCard)
+
+		const brandColor = brandColors[car.brand]
+		if (brandColor) {
+			carCard.style.setProperty("--car-bg", brandColor)
+		}
 	})
 }
 renderCars()
@@ -104,28 +109,25 @@ renderCars()
 ///////////////////////////////////////////////
 ///////  choose car and start ordering  ///////
 ///////////////////////////////////////////////
-function purchaseButtonClick(carId) {
-	console.log("Button clicked for car ID:", carId)
+const purchaseButtons = document.querySelectorAll('[id^="purchase-button-"]')
+purchaseButtons.forEach(button => {
+	button.addEventListener("click", () => purchaseButtonClick(button.id))
+})
 
-	selectedCarId = carId
+function purchaseButtonClick(buttonId) {
+	console.log("Button clicked:", buttonId)
+
+	selectedCarId = buttonId.replace("purchase-button-", "")
 	console.log("Selected car ID:", selectedCarId)
 
 	const carDetails = cars.find(car => car.id === parseInt(selectedCarId))
 	console.log("Selected car details:", carDetails)
 
-	selectedCarData = {
-		brand: carDetails.brand,
-		model: carDetails.model,
-		year: carDetails.year,
-		enginePower: carDetails.enginePower,
-		mileage: carDetails.mileage,
-		price: carDetails.price,
-		image: carDetails.image,
-		accessories: carDetails.accessoriesByModel.concat(sharedAccesories),
-	}
-
 	localStorage.setItem("selectedCarId", selectedCarId)
 	localStorage.setItem("selectedCar", JSON.stringify(carDetails))
+
+	// Debugging - wyświetlenie ID wybranego samochodu w konsoli
+	console.log(localStorage.getItem("selectedCarId"))
 
 	allCarsSection.classList.replace("cars-sc", "display-none")
 	orderSection.classList.replace("display-none", "cars-sc")
@@ -142,10 +144,7 @@ function renderChosenCar() {
 
 	selectedCarId = localStorage.getItem("selectedCarId")
 
-	if (!selectedCarId) {
-		console.error("No car chosen")
-		return
-	} else {
+	if (selectedCarId !== null) {
 		// renderowanie wybranego samochodu
 
 		const selectedCarDetails = JSON.parse(localStorage.getItem("selectedCar"))
@@ -207,13 +206,21 @@ function renderChosenCar() {
 		link.textContent = "Call us for more info"
 		phoneButton.appendChild(link)
 
+		const brandColor = brandColors[selectedCarDetails.brand]
+
+		if (brandColor) {
+			chosenCarCard.style.setProperty("--car-bg", brandColor)
+		}
+
 		carDetailsContainer.append(year, enginePower, mileage, price, phoneButton)
 		carCard.append(brand, model, image, carDetailsContainer)
 		chosenCarCard.appendChild(carCard)
+	} else {
+		console.error("No selected car id found.")
 	}
 }
 
-// Ustawienie domyślnej daty odbioru zamówienia na 14 dni od dnia dzisiejszego
+// Ustawienie domyślnej daty odbioru zamowienia na 14 dni od dnia dzisiejszego
 const currentDate = new Date()
 currentDate.setDate(currentDate.getDate() + 14)
 defaultPickupDate = currentDate.toISOString().split("T")[0]
