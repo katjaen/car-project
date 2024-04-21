@@ -2,6 +2,16 @@ import { cars, brandColors, sharedAccesories } from "./carsData.js"
 
 let selectedCarId = null
 let defaultPickupDate = null
+let selectedCarData = {
+	brand: null,
+	model: null,
+	year: null,
+	enginePower: null,
+	mileage: null,
+	price: null,
+	image: null,
+	accessories: [],
+}
 
 const allCarsSection = document.getElementById("available-cars")
 const orderSection = document.getElementById("car-order-1")
@@ -75,6 +85,8 @@ function renderCars() {
 			"Click here to open the purchase form"
 		)
 
+		purchaseButton.addEventListener("click", () => purchaseButtonClick(car.id))
+
 		carDetailsContainer.append(
 			brandModel,
 			year,
@@ -89,47 +101,31 @@ function renderCars() {
 }
 renderCars()
 
-////////////////////////////////////
-////  render right backgrounds  ////
-////////////////////////////////////
-const purchaseButtons = document.querySelectorAll('[id^="purchase-button-"]')
+///////////////////////////////////////////////
+///////  choose car and start ordering  ///////
+///////////////////////////////////////////////
+function purchaseButtonClick(carId) {
+	console.log("Button clicked for car ID:", carId)
 
-function updateCarCardBackgroundColors() {
-	cars.forEach(car => {
-		const cleanModel = car.model.replace(/[^a-zA-Z0-9-_]/g, "")
-		const cleanId = car.id
-		const carCard = document.getElementById(`car-${cleanId}`)
-		if (carCard) {
-			const brandColor = brandColors[car.brand]
-			if (brandColor) {
-				carCard.style.setProperty("--car-bg", brandColor)
-			}
-		}
-	})
-}
-updateCarCardBackgroundColors()
-
-////////////////////////////////
-///////  start ordering  ///////
-////////////////////////////////
-purchaseButtons.forEach(button => {
-	button.addEventListener("click", () => purchaseButtonClick(button.id))
-})
-
-function purchaseButtonClick(buttonId) {
-	console.log("Button clicked:", buttonId)
-
-	selectedCarId = buttonId.replace("purchase-button-", "")
+	selectedCarId = carId
 	console.log("Selected car ID:", selectedCarId)
 
 	const carDetails = cars.find(car => car.id === parseInt(selectedCarId))
 	console.log("Selected car details:", carDetails)
 
+	selectedCarData = {
+		brand: carDetails.brand,
+		model: carDetails.model,
+		year: carDetails.year,
+		enginePower: carDetails.enginePower,
+		mileage: carDetails.mileage,
+		price: carDetails.price,
+		image: carDetails.image,
+		accessories: carDetails.accessoriesByModel.concat(sharedAccesories),
+	}
+
 	localStorage.setItem("selectedCarId", selectedCarId)
 	localStorage.setItem("selectedCar", JSON.stringify(carDetails))
-
-	// Debugging - wyświetlenie ID wybranego samochodu w konsoli
-	console.log(localStorage.getItem("selectedCarId"))
 
 	allCarsSection.classList.replace("cars-sc", "display-none")
 	orderSection.classList.replace("display-none", "cars-sc")
@@ -216,6 +212,13 @@ function renderChosenCar() {
 		chosenCarCard.appendChild(carCard)
 	}
 }
+
+// Ustawienie domyślnej daty odbioru zamówienia na 14 dni od dnia dzisiejszego
+const currentDate = new Date()
+currentDate.setDate(currentDate.getDate() + 14)
+defaultPickupDate = currentDate.toISOString().split("T")[0]
+datePicker.value = defaultPickupDate
+datePicker.min = defaultPickupDate
 
 ///////////////////////////////////
 ///////  back to all cars   ///////
